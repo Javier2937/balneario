@@ -17,6 +17,20 @@ class BalnearioController extends Controller
         ['id' => 8, 'nombre' => 'Renta de casa de campaña', 'imagen' => 'casa_campana.jpg', 'descripcion' => 'Casas de campaña en renta. Precios desde $150 hasta $220'],
     ];
 
+    private $costos = [
+        'Espacio para casa de campaña' => 350,
+        'Renta casa 4 personas' => 150,
+        'Renta casa 8 personas' => 180,
+        'Renta casa 12 personas' => 220,
+        'Cabaña para 4 personas' => 2500,
+        'Cabaña para 6 personas' => 3000,
+        'Silla' => 30,
+        'Mesa' => 50,
+        'Sombrilla' => 50,
+        'Entrada adulto' => 180,
+        'Entrada niño' => 120,
+    ];
+
     public function index()
     {
         return view('balneario.index', ['zonas' => $this->zonas]);
@@ -25,7 +39,26 @@ class BalnearioController extends Controller
     public function detalle($id)
     {
         $zona = collect($this->zonas)->firstWhere('id', $id);
-        return view('balneario.detalle', ['zona' => $zona]);
+        return view('balneario.detalle', ['zona' => $zona, 'costos' => $this->costos]);
     }
+    public function login(Request $request)
+{
+    $usuario = $request->input('usuario');
+    $password = $request->input('password');
+
+    if ($usuario === 'Javier' && $password === 'JAVIER') {
+        session(['usuario' => 'Javier']);
+        return redirect('/');
+    }
+
+    return back()->with('error', 'Credenciales incorrectas');
+}
+
+public function logout()
+{
+    session()->forget('usuario');
+    return redirect('/');
+}
+
 }
 
