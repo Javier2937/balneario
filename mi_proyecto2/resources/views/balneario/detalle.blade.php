@@ -132,25 +132,27 @@
         let carrito = [];
 
         function agregarAlCarrito() {
-            let select = document.getElementById("opciones");
-            let cantidad = parseInt(document.getElementById("cantidad").value);
-            let precio = parseInt(select.value);
-            let nombre = select.options[select.selectedIndex].text;
+            const select = document.getElementById("opciones");
+            const cantidad = parseInt(document.getElementById("cantidad").value);
+
+            const textoSeleccionado = select.options[select.selectedIndex].text;
+            const match = textoSeleccionado.match(/\$([0-9]+)/);
+            const precio = match ? parseInt(match[1]) : 0;
 
             if (precio > 0 && cantidad > 0) {
-                let subtotal = precio * cantidad;
+                const subtotal = precio * cantidad;
                 total += subtotal;
 
-                carrito.push({ nombre, cantidad, subtotal });
+                carrito.push({ nombre: textoSeleccionado, cantidad, subtotal });
 
-                let lista = document.getElementById("listaCompra");
-                let item = document.createElement("li");
-                item.textContent = `${nombre} x${cantidad} - $${subtotal}`;
+                const lista = document.getElementById("listaCompra");
+                const item = document.createElement("li");
+                item.textContent = `${textoSeleccionado} x${cantidad} - $${subtotal}`;
                 lista.appendChild(item);
 
                 document.getElementById("total").textContent = total;
             } else {
-                alert("Selecciona un servicio válido y una cantidad mayor a 0.");
+                alert("Selecciona un servicio válido y una cantidad válida.");
             }
         }
 
@@ -160,11 +162,38 @@
                 return;
             }
 
-            alert(`¡Gracias por tu compra! Total: $${total}`);
-            carrito = [];
-            total = 0;
-            document.getElementById("listaCompra").innerHTML = '';
-            document.getElementById("total").textContent = '0';
+            const data = {
+                productos: carrito,
+                total: total,
+                fecha: new Date().toLocaleString()
+            };
+
+            fetch("/guardar-ticket", {
+
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("No se pudo guardar el ticket.");
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert(`¡Compra realizada! Ticket ID: ${data.ticket}`);
+                carrito = [];
+                total = 0;
+                document.getElementById("listaCompra").innerHTML = '';
+                document.getElementById("total").textContent = '0';
+            })
+            .catch(error => {
+                alert("Error al finalizar la compra: " + error.message);
+                console.error(error);
+            });
         }
     </script>
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class BalnearioController extends Controller
 {
@@ -41,24 +42,42 @@ class BalnearioController extends Controller
         $zona = collect($this->zonas)->firstWhere('id', $id);
         return view('balneario.detalle', ['zona' => $zona, 'costos' => $this->costos]);
     }
-    public function login(Request $request)
-{
-    $usuario = $request->input('usuario');
-    $password = $request->input('password');
 
-    if ($usuario === 'Javier' && $password === 'JAVIER') {
-        session(['usuario' => 'Javier']);
+    public function login(Request $request)
+    {
+        $usuario = $request->input('usuario');
+        $password = $request->input('password');
+
+        if ($usuario === 'Javier' && $password === 'JAVIER') {
+            session(['usuario' => 'Javier']);
+            return redirect('/');
+        }
+
+        return back()->with('error', 'Credenciales incorrectas');
+    }
+
+    public function logout()
+    {
+        session()->forget('usuario');
         return redirect('/');
     }
 
-    return back()->with('error', 'Credenciales incorrectas');
-}
-
-public function logout()
+    public function verTickets()
 {
-    session()->forget('usuario');
-    return redirect('/');
+    if (!session('usuario') || session('usuario') !== 'Javier') {
+        return redirect('/')->with('error', 'Acceso no autorizado.');
+    }
+
+    $ticketsPath = storage_path('app/tickets');
+    $files = glob($ticketsPath . '/*.json');
+    $tickets = [];
+
+    foreach ($files as $file) {
+        $content = file_get_contents($file);
+        $tickets[] = json_decode($content, true);
+    }
+
+    return view('balneario.tickets', compact('tickets'));
 }
 
 }
-

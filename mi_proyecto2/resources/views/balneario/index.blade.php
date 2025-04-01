@@ -26,7 +26,7 @@
         }
         .top-bar {
             text-align: right;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
         .top-bar a {
             color: white;
@@ -38,6 +38,22 @@
         }
         .top-bar a:hover {
             background-color: #e68900;
+        }
+        .admin-section {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .admin-section a {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 15px;
+            font-weight: bold;
+        }
+        .admin-section a:hover {
+            background-color: #0056b3;
         }
         h2 {
             text-align: center;
@@ -74,7 +90,7 @@
 <body>
 
     <header>
-        <h1>Balneario Paraíso 🌊☀️</h1>
+        <h1>Balneario Paraíso 🌴🌊</h1>
         <div class="top-bar">
             @if(session('usuario'))
                 <span>Bienvenido, <strong>{{ session('usuario') }}</strong></span>
@@ -86,6 +102,13 @@
     </header>
 
     <div class="container">
+
+        @if(session('usuario') === 'Javier')
+            <div class="admin-section">
+                <a href="{{ url('/tickets') }}">📄 Ver Tickets Generados</a>
+            </div>
+        @endif
+
         <h2>Explora nuestras zonas</h2>
         <div class="galeria">
             @foreach ($zonas as $zona)
